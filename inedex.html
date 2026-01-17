@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontend 9-Dars: Figma va Dizayn</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600;700&family=Nunito:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap');
+    
+    body { font-family: 'Nunito', sans-serif; overflow: hidden; margin: 0; color: #2d3436; }
+    
+    /* --- BACKGROUND --- */
+    .animated-bg {
+      background-color: #2c2c54;
+      background-image: 
+      radial-gradient(#40407a 1px, transparent 1px),
+      linear-gradient(to bottom right, #2c2c54, #474787);
+      background-size: 30px 30px, cover;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    
+    .floating-icon {
+      position: absolute;
+      color: rgba(162, 155, 254, 0.15);
+      font-size: 2rem;
+      animation: float 8s ease-in-out infinite;
+      z-index: 0;
+    }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    
+    /* --- SLIDE CARD --- */
+    .slide-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      width: 95%; height: 90%;
+      box-shadow: 0 0 50px rgba(108, 92, 231, 0.2);
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      border: 4px solid #a29bfe;
+      overflow-y: auto;
+      position: relative;
+      z-index: 10;
+    }
+    @media (min-width: 768px) { .slide-card { border-radius: 30px; width: 90%; height: 85%; padding: 40px; } }
+    .slide-card.active { display: flex; animation: zoomIn 0.5s; }
+    
+    /* --- TYPOGRAPHY --- */
+    h1 { font-family: 'Fredoka', sans-serif; }
+    .code-font { font-family: 'Fira Code', monospace; }
+    
+    /* --- INTERACTIVE CARDS --- */
+    .tag-card {
+      background: #f3e5f5; border: 2px solid #e1bee7; border-radius: 12px; padding: 20px;
+      transition: all 0.3s; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .tag-card:hover { transform: translateY(-5px); border-color: #a29bfe; box-shadow: 0 10px 20px rgba(162, 155, 254, 0.2); background: white; }
+    
+    /* --- BUTTONS --- */
+    .nav-btn {
+      position: absolute; bottom: 20px; padding: 10px 20px; border-radius: 50px; font-weight: bold; border: none; cursor: pointer; transition: all 0.3s; z-index: 20; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    }
+    .prev-btn { left: 20px; background: #2c2c54; color: #a4b0be; }
+    .prev-btn:hover { background: #40407a; }
+    .next-btn { right: 20px; background: #a29bfe; color: white; }
+    .next-btn:hover { background: #6c5ce7; transform: scale(1.05); }
+    
+    /* --- LOGO --- */
+    .logo { position: fixed; top: 45px; left: 25px; width: 60px; z-index: 50; }
+    @media (min-width: 768px) { .logo { width: 120px; top: 85px; left: 95px; } }
+    
+    /* --- MODAL --- */
+    #infoModal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+      display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(8px);
+    }
+    .modal-content {
+      background: white; padding: 30px; border-radius: 20px; max-width: 600px; width: 90%;
+      text-align: center; position: relative; animation: rubberBand 0.5s; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 35px; cursor: pointer; color: #555; transition: 0.2s; }
+    .close-modal:hover { color: #a29bfe; transform: scale(1.2); }
+    #modalImg { max-height: 50vh; object-fit: contain; margin-top: 15px; border-radius: 10px; }
+    
+    /* --- PROGRESS BAR --- */
+    .progress-container { position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: rgba(255,255,255,0.1); z-index: 20; }
+    .progress-bar { height: 100%; background: #a29bfe; width: 0%; transition: width 0.5s; }
+    
+    /* --- FIGMA COLORS --- */
+    .figma-red { color: #F24E1E; }
+    .figma-purple { color: #A259FF; }
+    .figma-blue { color: #1ABCFE; }
+    .figma-green { color: #0ACF83; }
+    
+  </style>
+</head>
+<body>
+  
+  <div class="animated-bg">
+    <div class="progress-container"><div class="progress-bar"></div></div>
+    
+    <!-- Floating Icons -->
+    <i class="fab fa-figma floating-icon" style="top: 10%; left: 10%; animation-duration: 8s;"></i>
+    <i class="fas fa-pencil-ruler floating-icon" style="top: 20%; right: 20%; animation-duration: 12s;"></i>
+    <i class="fas fa-layer-group floating-icon" style="bottom: 15%; left: 15%; animation-duration: 10s;"></i>
+    <i class="fas fa-code floating-icon" style="bottom: 10%; right: 10%; animation-duration: 15s;"></i>
+    
+    <!-- LOGO -->
+    <img src="logo.png" alt="PDP Junior" class="logo animate__animated animate__fadeInLeft">
+    
+    <!-- MODAL -->
+    <div id="infoModal" onclick="closeModal()">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle" class="text-3xl font-bold mb-4 text-[#a29bfe]"></h2>
+        <p id="modalDesc" class="text-lg text-gray-600 mb-4"></p>
+        <img id="modalImg" src="" class="mx-auto rounded-lg shadow-md hidden">
+      </div>
+    </div>
+    
+    <!-- 1. KIRISH -->
+    <div class="slide-card active" id="slide1">
+      <div class="flex flex-col items-center justify-center h-full text-center py-10">
+        <div class="bg-purple-100 p-8 rounded-full mb-6 animate__animated animate__tada animate__infinite">
+          <i class="fab fa-figma text-8xl text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-purple-500 to-blue-500"></i>
+        </div>
+        <h1 class="text-4xl md:text-7xl font-black mb-4 text-[#2d3436]">DIZAYN VA <span class="text-[#a29bfe]">KOD</span> 🎨</h1>
+        <h2 class="text-xl md:text-3xl text-gray-500 font-bold animate__animated animate__fadeInUp animate__delay-1s">9-Dars: Figma Bilan Tanishuv</h2>
+        <button onclick="changeSlide(1)" class="mt-10 bg-[#a29bfe] text-white text-lg md:text-xl px-10 py-4 rounded-full font-bold shadow-xl hover:bg-[#6c5ce7] transition transform hover:scale-110 animate__animated animate__bounceIn animate__delay-2s">
+          Boshladik! 🚀
+        </button>
+      </div>
+    </div>
+    
+    <!-- 2. BILASIZMI? -->
+    <div class="slide-card" id="slide2">
+      <h1 class="text-3xl md:text-6xl font-black text-center mb-8 text-yellow-500">BILASIZMI? 🤯</h1>
+      <div class="flex flex-col items-center justify-center h-full pb-10">
+        <div class="bg-white p-6 md:p-8 rounded-full shadow-2xl mb-6 border-4 border-yellow-400 animate__animated animate__swing">
+          <i class="fas fa-drafting-compass text-6xl md:text-7xl text-gray-700"></i>
+        </div>
+        <div class="bg-gray-100 p-6 md:p-8 rounded-3xl border-l-8 border-yellow-400 max-w-4xl text-center shadow-md">
+          <p class="text-xl md:text-2xl font-bold text-gray-700">
+            Dasturchilar kod yozishdan oldin... <br>
+            <span class="text-3xl md:text-4xl text-[#a29bfe] font-black block my-3">DIZAYNNI KO'RISHI SHART!</span>
+          </p>
+          <p class="text-gray-600 mt-4 text-base md:text-lg">
+            Xuddi usta uy qurishdan oldin chizmani (plan) ko'rgani kabi. Bizning chizmamiz - bu <strong>Figma</strong>.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 3. FIGMA NIMA? -->
+    <div class="slide-card" id="slide3">
+      <h1 class="text-3xl md:text-5xl font-bold text-center mb-8 text-purple-600">FIGMA NIMA? 🖌️</h1>
+      <p class="text-center text-gray-500 mb-8 text-lg">Figma - bu dizayner va dasturchining uchrashadigan joyi.</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-full pb-20 overflow-y-auto px-4">
+        <!-- Dizayner -->
+        <div class="bg-pink-50 p-6 rounded-2xl border-t-8 border-pink-500 shadow-lg text-center transform hover:scale-105 transition">
+          <i class="fas fa-paint-brush text-5xl text-pink-500 mb-4"></i>
+          <h3 class="text-2xl font-bold text-gray-700 mb-2">Dizayner</h3>
+          <p class="text-gray-600">Saytning ko'rinishini chizadi. Ranglar, rasmlar va shakllarni tanlaydi.</p>
+          <div class="mt-4 bg-white p-2 rounded text-sm text-pink-400 font-bold">"Men go'zallik yarataman!"</div>
+        </div>
+        
+        <!-- Dasturchi -->
+        <div class="bg-blue-50 p-6 rounded-2xl border-t-8 border-blue-500 shadow-lg text-center transform hover:scale-105 transition">
+          <i class="fas fa-laptop-code text-5xl text-blue-500 mb-4"></i>
+          <h3 class="text-2xl font-bold text-gray-700 mb-2">Dasturchi (Siz)</h3>
+          <p class="text-gray-600">Chizilgan rasmni kodga (HTML/CSS) aylantiradi va ishlatadi.</p>
+          <div class="mt-4 bg-white p-2 rounded text-sm text-blue-400 font-bold">"Men uni jonlantiraman!"</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 4. FIGMA INTERFEYSI -->
+    <div class="slide-card" id="slide4">
+      <h1 class="text-3xl md:text-5xl font-bold text-center mb-8 text-indigo-600">FIGMA OYNASI 🖥️</h1>
+      
+      <div class="flex flex-col md:flex-row gap-8 h-full pb-20 overflow-y-auto px-4 items-center">
+        <div class="w-full md:w-2/3">
+          <img src="https://cdn.dribbble.com/users/5031392/screenshots/15467520/media/c33580556f082e6347f20817c768a442.png?compress=1&resize=400x300" class="rounded-xl shadow-2xl border-4 border-gray-200 w-full object-cover">
+        </div>
+        
+        <div class="w-full md:w-1/3 space-y-4">
+          <div onclick="showModal('Frame', 'Frame - bu saytning bir sahifasi yoki qutisi. Masalan, iPhone 14 ekrani yoki Kompyuter ekrani.', null)" class="bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition border-l-4 border-purple-500">
+            <h3 class="font-bold text-purple-600 text-lg"># Frame</h3>
+            <p class="text-sm text-gray-500">Ishchi maydon (Qog'oz).</p>
+          </div>
+          <div onclick="showModal('Layers', 'Layers (Qatlamlar) - chap tomonda joylashgan ro\'yxat. Har bir rasm va yozuv alohida qatlamda turadi.', null)" class="bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition border-l-4 border-blue-500">
+            <h3 class="font-bold text-blue-600 text-lg">Layers</h3>
+            <p class="text-sm text-gray-500">Chapdagi ro'yxat.</p>
+          </div>
+          <div onclick="showModal('Inspect (Dev Mode)', 'Eng muhim joy! O\'ng tomonda joylashgan. Bu yerdan rang kodi, o\'lcham va CSS kodlarini olamiz.', null)" class="bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition border-l-4 border-green-500">
+            <h3 class="font-bold text-green-600 text-lg">&lt;/&gt; Inspect</h3>
+            <p class="text-sm text-gray-500">Dasturchi rejimi.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 5. MA'LUMOT OLISH (INSPECT) -->
+    <div class="slide-card" id="slide5">
+      <h1 class="text-3xl md:text-5xl font-bold text-center mb-6 text-green-500">KODNI O'G'IRLASH 😉</h1>
+      <p class="text-center text-gray-500 mb-8">Dizayndan kerakli ma'lumotlarni qanday olamiz?</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full pb-20 overflow-y-auto px-4">
+        
+        <div class="tag-card group">
+          <i class="fas fa-palette text-4xl text-pink-500 mb-3"></i>
+          <h3 class="text-xl font-bold text-gray-700">Ranglar</h3>
+          <p class="text-sm text-gray-500 mt-2">Element ustiga bossangiz, o'ng tomonda rangi chiqadi.</p>
+          <div class="bg-gray-800 text-white p-2 rounded mt-2 font-mono text-xs">#FF5733</div>
+        </div>
+        
+        <div class="tag-card group">
+          <i class="fas fa-ruler-combined text-4xl text-blue-500 mb-3"></i>
+          <h3 class="text-xl font-bold text-gray-700">O'lchamlar</h3>
+          <p class="text-sm text-gray-500 mt-2">Kengligi (Width) va Balandligi (Height) ni ko'rish.</p>
+          <div class="bg-gray-800 text-white p-2 rounded mt-2 font-mono text-xs">300px x 200px</div>
+        </div>
+        
+        <div class="tag-card group">
+          <i class="fas fa-font text-4xl text-yellow-500 mb-3"></i>
+          <h3 class="text-xl font-bold text-gray-700">Matn</h3>
+          <p class="text-sm text-gray-500 mt-2">Shrift turi, kattaligi va qalinligini bilish.</p>
+          <div class="bg-gray-800 text-white p-2 rounded mt-2 font-mono text-xs">Roboto, 16px</div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- 6. RASM FORMATLARI (SVG, PNG, JPG) -->
+    <div class="slide-card" id="slide6">
+      <h1 class="text-3xl md:text-5xl font-bold text-center mb-8 text-red-500">RASMLAR JANGI 🥊</h1>
+      
+      <div class="flex flex-col gap-6 h-full pb-20 overflow-y-auto px-4">
+        
+        <!-- SVG -->
+        <div onclick="showModal('SVG (Scalable Vector Graphics)', 'Vektorli rasm. Qancha kattalashtirsangiz ham sifati buzilmaydi. Ikonkalar va logotiplar uchun eng zo\'ri!', null)" class="bg-white p-4 rounded-xl shadow-md border-l-8 border-orange-500 flex items-center cursor-pointer hover:bg-orange-50 transition">
+          <div class="bg-orange-100 p-3 rounded-full mr-4"><i class="fas fa-bezier-curve text-2xl text-orange-500"></i></div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-800">SVG (Eng Zo'ri)</h3>
+            <p class="text-sm text-gray-500">Ikonkalar va Logotiplar uchun. Sifati buzilmaydi.</p>
+          </div>
+        </div>
+        
+        <!-- PNG -->
+        <div onclick="showModal('PNG (Portable Network Graphics)', 'Orqa foni shaffof (transparent) bo\'lgan rasmlar uchun ishlatiladi. Sifati yaxshi, lekin hajmi katta bo\'lishi mumkin.', null)" class="bg-white p-4 rounded-xl shadow-md border-l-8 border-blue-500 flex items-center cursor-pointer hover:bg-blue-50 transition">
+          <div class="bg-blue-100 p-3 rounded-full mr-4"><i class="fas fa-image text-2xl text-blue-500"></i></div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-800">PNG (Shaffof)</h3>
+            <p class="text-sm text-gray-500">Orqa foni yo'q rasmlar uchun.</p>
+          </div>
+        </div>
+        
+        <!-- JPG -->
+        <div onclick="showModal('JPEG / JPG', 'Fotosuratlar va ko\'p rangli rasmlar uchun. Hajmi kichik, lekin orqa foni shaffof bo\'lmaydi.', null)" class="bg-white p-4 rounded-xl shadow-md border-l-8 border-green-500 flex items-center cursor-pointer hover:bg-green-50 transition">
+          <div class="bg-green-100 p-3 rounded-full mr-4"><i class="fas fa-camera text-2xl text-green-500"></i></div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-800">JPG (Foto)</h3>
+            <p class="text-sm text-gray-500">Oddiy rasmlar va fotosuratlar uchun.</p>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- 7. AMALIYOT: DIZAYNDAN KODGA -->
+    <div class="slide-card" id="slide7">
+      <h1 class="text-3xl md:text-5xl font-bold text-center mb-6 text-teal-600">AMALIYOT VAQTI 🛠️</h1>
+      <h2 class="text-xl md:text-2xl text-center text-gray-500 mb-8">Tayyor UI elementni HTML ga o'tkazamiz</h2>
+      
+      <div class="flex flex-col md:flex-row gap-8 h-full pb-20 overflow-y-auto px-4">
+        <div class="w-full md:w-1/2 bg-gray-100 p-6 rounded-xl border-2 border-gray-300 flex flex-col items-center justify-center">
+          <p class="font-bold text-gray-400 mb-4">FIGMA DIZAYN</p>
+          <!-- Fake UI Element -->
+          <div class="bg-white p-6 rounded-2xl shadow-lg w-64 text-center">
+            <div class="w-16 h-16 bg-blue-500 rounded-full mx-auto mb-4"></div>
+            <h3 class="font-bold text-lg">Ali Valiyev</h3>
+            <p class="text-gray-500 text-sm mb-4">Dasturchi</p>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm">Follow</button>
+          </div>
+        </div>
+        
+        <div class="w-full md:w-1/2 bg-[#1e1e1e] p-6 rounded-xl border-2 border-gray-600 shadow-2xl relative overflow-x-auto">
+          <div class="absolute top-2 left-2 flex gap-2">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+          </div>
+          <pre class="text-gray-300 font-mono text-xs md:text-sm mt-6">
+            &lt;div class="card"&gt;
+            &lt;img src="avatar.png" alt="Ali"&gt;
+            &lt;h3&gt;Ali Valiyev&lt;/h3&gt;
+            &lt;p&gt;Dasturchi&lt;/p&gt;
+            &lt;button&gt;Follow&lt;/button&gt;
+            &lt;/div&gt;
+          </pre>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 8. UYGA VAZIFA -->
+    <div class="slide-card" id="slide8">
+      <div class="flex flex-col items-center justify-center h-full text-center pb-20">
+        <i class="fab fa-figma text-8xl text-purple-500 mb-6 animate__animated animate__bounceIn"></i>
+        <h1 class="text-4xl md:text-6xl font-black mb-6 text-[#2d3436]">UYGA VAZIFA 🏠</h1>
+        
+        <div class="bg-white p-8 rounded-3xl shadow-xl border-t-8 border-purple-500 w-full max-w-2xl mx-4 text-left">
+          <ul class="space-y-4 text-lg md:text-xl text-gray-700">
+            <li class="flex items-start">
+              <i class="fas fa-file-export text-green-500 mr-4 mt-1"></i>
+              <span><strong>Eksport:</strong> Figmadan 3 xil rasm (SVG, PNG, JPG) yuklab olish.</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-code text-blue-500 mr-4 mt-1"></i>
+              <span><strong>Kodlash:</strong> Yuklab olingan rasmlarni HTML faylga qo'yib ko'rish.</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-keyboard text-purple-500 mr-4 mt-1"></i>
+              <span><strong>TypingClub:</strong> 45-bosqichgacha.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- NAVIGATSIYA -->
+    <button class="nav-btn prev-btn" onclick="changeSlide(-1)"><i class="fas fa-arrow-left"></i> Ortga</button>
+    <button class="nav-btn next-btn" onclick="changeSlide(1)">Oldinga <i class="fas fa-arrow-right"></i></button>
+    
+  </div>
+  
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide-card');
+    const progressBar = document.querySelectorAll('.progress-bar');
+    
+    function updateProgressBar() {
+      progressBar.forEach(bar => {
+        let width = ((currentSlide + 1) / slides.length) * 100;
+        bar.style.width = width + '%';
+      });
+    }
+    
+    function changeSlide(dir) {
+      slides[currentSlide].classList.remove('active');
+      currentSlide += dir;
+      if (currentSlide >= slides.length) currentSlide = slides.length - 1;
+      if (currentSlide < 0) currentSlide = 0;
+      slides[currentSlide].classList.add('active');
+      updateProgressBar();
+    }
+    
+    function showModal(title, desc, img) {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalDesc').innerText = desc;
+      const imgEl = document.getElementById('modalImg');
+      if(img) {
+        imgEl.src = img;
+        imgEl.classList.remove('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+      }
+      document.getElementById('infoModal').style.display = 'flex';
+    }
+    
+    function closeModal() {
+      document.getElementById('infoModal').style.display = 'none';
+    }
+    
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowRight') changeSlide(1);
+      if(e.key === 'ArrowLeft') changeSlide(-1);
+      if(e.key === 'Escape') closeModal();
+    });
+    
+    updateProgressBar();
+  </script>
+  
+</body>
+</html>
